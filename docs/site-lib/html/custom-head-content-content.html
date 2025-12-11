@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="viewer">
+  <img id="viewer-img">
+</div>
+<style>
+    #viewer {
+  display: none;
+  z-index: 9998;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+  animation: fadeIn 0.25s ease;
+}
+
+#viewer-img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  /* on top */
+  z-index: 9999;
+  transition: transform 0.25s ease;
+  cursor: grab;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+</style>
+<script>
+    const viewer = document.getElementById("viewer");
+const viewerImg = document.getElementById("viewer-img");
+
+let scale = 1;
+let isDragging = false;
+let startX, startY, imgX = 0, imgY = 0;
+
+document.querySelectorAll("img").forEach(img => {
+  img.addEventListener("click", () => {
+    viewerImg.src = img.src;
+    viewer.style.display = "flex";
+    scale = 1;
+    imgX = imgY = 0;
+    viewerImg.style.transform = "translate(0px,0px) scale(1)";
+  });
+});
+
+// Close viewer
+viewer.addEventListener("click", (e) => {
+  if (e.target === viewer) viewer.style.display = "none";
+});
+
+// Mouse wheel zoom
+viewerImg.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  let delta = e.deltaY > 0 ? -0.1 : 0.1;
+  scale = Math.min(Math.max(1, scale + delta), 5);
+  viewerImg.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
+});
+
+// Drag to move image
+viewerImg.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  startX = e.clientX - imgX;
+  startY = e.clientY - imgY;
+  viewerImg.style.cursor = "grabbing";
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+  imgX = e.clientX - startX;
+  imgY = e.clientY - startY;
+  viewerImg.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+  viewerImg.style.cursor = "grab";
+});
+
+</script>
+</body>
+</html>    
